@@ -1,4 +1,6 @@
-\documentclass{../harvardml}
+\documentclass{harvardml}
+\usepackage{amsmath}
+\usepackage{mathtools}
 
 % Authors: 
 % Edited by: Mark Goldstein + others (jan 2018)
@@ -31,7 +33,7 @@
 \newtheorem{defn}{Definition}[section]
 \theoremstyle{plain}
 \usepackage[textsize=tiny]{todonotes}
-\usepackage{../common}
+\usepackage{common}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -81,7 +83,91 @@ In this class, we will be exploring the question of ``how do we model the trend 
 
 
 \begin{solution}
-	Your solution here.
+
+\begin{enumerate}
+    \item [1.] We assume that $x_1 \neq x_2$. Then, the system of linear equations is
+    \begin{align*}
+    \begin{cases}
+        y_1 = w_0 + w_1 x_1 \\
+        y_2 = w_0 + w_1 x_2
+    \end{cases} \tag*{(1.1,1.2)} \\
+    \therefore \quad \begin{cases}
+        x_2y_1 = x_2w_0 + w_1x_1x_2 \\
+        x_1y_2 = x_1w_0 + w_1x_1x_2
+    \end{cases}
+    \end{align*}
+    Subtracting gives
+    \begin{align*}
+        x_1y_2 - x_2y_1 &= w_0(x_1-x_2) \\
+    \end{align*}
+    Assuming that $x_1 \neq x_2$,
+    \begin{align*}
+        \Aboxed{ w_0 &= \frac{ x_1y_2 - x_2y_1 }{x_1 - x_2} }
+    \end{align*}
+    Subtracting (1.1) from (1.2) gives
+    \begin{align*}
+        y_2 - y_1 &= w_1(x_2 - x_1) \\
+        \therefore \quad \Aboxed{ w_1 &= \frac{y_2 - y_1}{x_2 - x_1} }
+    \end{align*}
+
+
+    \item[2.] We have
+    \begin{align*}
+        \Aboxed { \mathbf{X} &= {\begin{bmatrix}
+            1 & x_1 \\
+            1 & x_2
+        \end{bmatrix}}; \quad
+        \mathbf{y} = {\begin{bmatrix}
+            y_1 \\
+            y_2
+        \end{bmatrix}}; \quad
+        \mathbf{w} = {\begin{bmatrix}
+            w_0 \\
+            w_1
+        \end{bmatrix}} }
+    \end{align*}
+    Note that
+    \begin{align*}
+        \mathbf{X} \cdot \mathbf{w} &= \begin{bmatrix}
+            w_0 + w_1x_1 \\
+            w_0 + w_1x_2
+        \end{bmatrix}
+    \end{align*}
+    corresponds to the RHS of (1.1,1.2) and thus
+    \begin{align*}
+        \mathbf{y} &= \mathbf{X} \mathbf{w} \tag*{(1.3)}
+    \end{align*}
+
+    \item[3.] Note that (1.3) is a matrix equation. Thus, $\mathbf{w}$ has a unique solution iff $\mathbf{X}$ is invertible, which occurs iff our data points are unique. When this is true, we have
+    \begin{align*}
+        \Aboxed{ \mathbf{w} &= \mathbf{X}^{-1} \mathbf{y} } \tag*{(1.4)}
+    \end{align*}
+
+
+    \item[4.] Solving (1.4) gives
+    \begin{align*}
+        \mathbf{w} &= \frac{1}{x_2 - x_1} \begin{bmatrix}
+            x_2 & -x_1 \\
+            -1 & 1
+        \end{bmatrix} \cdot \begin{bmatrix}
+            y_1 \\
+            y_2
+        \end{bmatrix} \\
+        &= \frac{1}{x_2 - x_1} \begin{bmatrix}
+            x_2y_1 -x_1y_2 \\
+            -y_1 + y_2
+        \end{bmatrix} \\
+        \therefore \quad \mathbf{w} &= \begin{bmatrix}
+            \frac{ x_1y_2 - x_2y_1 }{x_1 - x_2} \\
+            \frac{y_2 - y_1}{x_2 - x_1}
+        \end{bmatrix}
+    \end{align*}
+    matching up with our answer in (1).
+
+
+    \item[5.] When we have a very large number of data points, the equation derived in (3) may not hold. This is because $\mathbf{X}$ may have many more rows than it does columns. In such a case---unless all rows are linear combinations of two basis rows---we may have contradictory rows, and therefore no exact solution.
+\end{enumerate}
+
 \end{solution}
 
 \color{black}
@@ -116,7 +202,34 @@ $$y = f(x_1, x_2) = \exp\left(-(x_1 - 2)^2 - (x_2 - 1)^2 \right)$$
 
 
 \begin{solution}
-	Your solution here.
+
+\begin{enumerate}
+    \item [1.] The plot appears to show that there exists a unique maximum plant height at some value of $x$ between 10 and 15. Based on our knowledge of polynomials, we know that for $a = -3 < 0$, we will observe a concave curve with a unique, global maximum.
+
+    \item[2.] Set the first derivative to 0:
+    \begin{align*}
+        \frac{dy}{dx} = -6x + 72 &= 0 \\
+        \therefore \quad \Aboxed{ x &= 12 }
+    \end{align*}
+    We can confirm this is a maximum by taking the second derivative:
+    \begin{align*}
+        \frac{d^2 y}{dx^2} &= -6 < 0
+    \end{align*}
+    Thus, Nari should give her plant 12 ounces of water per week. Also,
+    \begin{align*}
+        y &= -3\left(12^2\right) + 72(12) + 70 \\
+        \therefore \quad \Aboxed{ y &= 502 }
+    \end{align*}
+    Thus, with 12 ounces of water, Nari's plant will grow 502mm.
+
+    \item[3.] Re-writing out $f$ we have
+    \begin{align*}
+        y &= e^{ - \left\{ (x_1-2)^2 + (x_2-1)^2 \right\} }
+    \end{align*}
+    We can see that $- \left\{ (x_1-2)^2 + (x_2-1)^2 \right\} \leq 0$. Thus, $y$ achieves its global maximum when \newline $- \left\{ (x_1-2)^2 + (x_2-1)^2 \right\} = 0$, which occurs iff $\boxed{x_1 = 2}$ and $\boxed{x_2 = 1}$. Moreover, in this case, $\boxed{ y = e^0 = 1 }$.
+
+\end{enumerate}
+
 \end{solution}
 
 \newpage 
@@ -162,7 +275,49 @@ In this class, one of our main focuses is to model the unexpected variations in 
 \newpage
 
 \begin{solution}
-	Your solution here.
+
+\begin{enumerate}
+    \item [1.] 
+    \begin{enumerate}
+        \item[a.] The support of a Gaussian distribution is $(-\infty, \infty)$. Thus, a Gaussian model implies a positive probability of $S, W < 0$, which does not make any physical sense, as size and weight cannot be negative.
+        \item[b.] A visual inspection of our plot shows high density around the values 4 and 120, corresponding to the expected values of $W$ and $S$ respectively. This shows that the empirical values of the average size and weight of the package correspond well with the theoretical values.
+    \end{enumerate}
+
+    \item[2.] This plot shows us that $S$ and $W$ are positively correlated: For a fixed, larger value of $S=122$ (versus $S=118$), we see that the conditional distribution of $W$ (given $S$) is shifted to the right.
+
+    \item[3.] We have
+    \begin{align*}
+        T &= 60 + 0.6W + 0.2S + \epsilon
+    \end{align*}
+    Thus,
+    \begin{align*}
+        \mathbb{E}(T) &= 60 + 0.6\mathbb{E}(W) + 0.2\mathbb{E}(S) + \mathbb{E}(\epsilon) \\
+        &= 60 + 0.6(4) + 0.2(120) + 0 \\
+        \therefore \quad \Aboxed{ \mathbb{E}(T) &= 86.4 }
+    \end{align*}
+    and
+    \begin{align*}
+        \text{Var}(T) &= 0.6^2 \text{Var}(W) + 0.2^2\text{Var}(S) + 2(0.6)(0.2)\text{Cov}(W,S) + \text{Var}(\epsilon) \\
+        &= 0.36(1.5) + 0.04(1.5) + 0.24(1) + 5 \\
+        \therefore \quad \Aboxed{ \text{Var}(T) &= 5.84 }
+    \end{align*}
+
+    \item[4.] Let $F$ denote the number of fragile packages that arrive today. Note that any given package $i$ has independent probability $P(W_i < 4) = \frac{1}{2}$ of being fragile. Thus, given a fixed number of packages, each of which is fragile with probability $\frac{1}{2}$, we are asking how many of these is fragile. This is the story of the Binomial distribution. Thus,
+    \begin{align*}
+        \boxed{ F | (N=n) \sim \text{Bin}\left(n, \frac{1}{2}\right) }
+    \end{align*}
+    and the PMF is
+    \begin{align*}
+        \Aboxed{ P(F=f) &= \binom{n}{f}\left(\frac{1}{2}\right)^n; \quad f \in \{0,1,\ldots,n\} }
+    \end{align*}
+
+    \item[5.] Empirical estimates:
+    \begin{verbatim}
+    mean = 6235.987638799891
+    stdev = 726.8731836729792
+    \end{verbatim}
+\end{enumerate}
+
 \end{solution} 
 
 \newpage 
@@ -198,7 +353,26 @@ In this class, we will bridge theory and practice through implementing the metho
 \end{problem}
 
 \begin{solution}
-	Your solution here.
+
+\begin{enumerate}
+    \item [1.] \texttt{data} is an array of $(x,y)$ pairs. Thus, Steve is just taking the first 2 rows of his data.
+    \item[2.] Steve used \texttt{np.hstack} when he probably meant to use \texttt{np.column\_stack}. He wanted to ``pair up'' the ones with the $x$ values, but ended up just concatenating all the $x$ values onto the end of the ones array.
+    \begin{verbatim}
+    y.shape = (100,)
+    X.shape = (100, 2)
+    \end{verbatim} 
+    There is no second coordinate for \texttt{y.shape} because \texttt{y} is a vector and is a 1D ndarray rather than a 2D ndarray (as is \texttt{X}).
+
+    \item[3.] The shape of $\mathbf{X}$ is $100 \times 2$ so that of $\mathbf{X}^\mathrm{T}\mathbf{X}$ is $2 \times 2$ and $(\mathbf{X}^\mathrm{T}\mathbf{X})^{-1} \mathbf{X}^\mathrm{T}$ is $2 \times 100$. Finally, the dimensions of $\hat{\mathbf{w}} = (\mathbf{X}^\mathrm{T}\mathbf{X})^{-1} \mathbf{X}^\mathrm{T}\mathbf{y}$ should be $\boxed{2 \times 1}$ since those of $\mathbf{y}$ are $100 \times 1$.
+
+    \item[4.] See code.
+
+    \item[5.] Corresponding mathematical expression in terms of vectors is
+    \begin{align*}
+        \Aboxed{ \text{MSE} &= \frac{1}{n} \left(\mathbf{y}-\hat{\mathbf{y}}\right)^\mathrm{T}\left(\mathbf{y}-\hat{\mathbf{y}}\right) }
+    \end{align*}
+\end{enumerate}
+
 \end{solution}
 
 \end{document}
