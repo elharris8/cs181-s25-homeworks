@@ -20,7 +20,12 @@
 \usepackage{enumitem}
 \usepackage{bm}
 \usepackage{bbm}
-
+\usepackage{float}
+\usepackage{mathtools}
+\usepackage{xcolor} % For table colors
+\usepackage{booktabs} % For better table formatting
+\usepackage{colortbl}
+\usepackage{makecell} % For multi-line cells
 
 \newcommand{\B}{\text{B}}
 \newcommand{\Beta}{\text{Beta}}
@@ -37,15 +42,14 @@
   columns=fullflexible}}{}
   
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Solution environment
 \usepackage{xcolor}
-\newenvironment{solution}{
-    \vspace{2mm}
-    \color{blue}\noindent\textbf{Solution}:
-}{}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+\usepackage{comment}
+\newenvironment{solution}
+  {\color{blue}\section*{Solution}}
+{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
@@ -195,7 +199,76 @@ times when we are likely to detect the planet.
 \newpage
 
 \begin{solution}
-	Your solution here.
+
+\begin{enumerate}
+    \item [1.] See \texttt{hw2.ipynb}.
+    \item [2.] The plots are included in Figures 1.2.1-3 below.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.65\textwidth]{img_output/basis1.png}
+        \caption*{\textcolor{blue}{Figure 1.2.1: Models for basis 1}}
+        \label{fig:q1.2a}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.65\textwidth]{img_output/basis2.png}
+        \caption*{\textcolor{blue}{Figure 1.2.2: Models for basis 2}}
+        \label{fig:q1.2b}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.65\textwidth]{img_output/basis3.png}
+        \caption*{\textcolor{blue}{Figure 1.2.3: Models for basis 3}}
+        \label{fig:q1.2c}
+    \end{figure}
+    Bias measures how much predictions deviate from the truth, while variance reflects sensitivity to changes in the training set, seen in how much the individual 10 models differ from one another. The bias-variance tradeoff, which means reducing bias increases variance and vice versa. Basis 1 has high bias (black line deviates from green) but low variance (individual models are similar). Basis 2 lowers bias (black line follows green better) but increases variance (greater spread among models). Basis 3 further reduces bias (but not my a lot) but has much higher variance, evident in the large deviations between individual models, leading to overfitting. Thus, the model under basis 2 approximates the true generating process best, as it balances bias against variance, ensuring that it fits the train data moderately well, whilst also generalizing.
+
+    \vspace{.5em}
+    (Note that the purple curves are strictly worse than the black curves because each purple curve is based on a single dataset, while the black curve represents the average of 10 different purple curves. As a result, the purple curves suffer from both the bias inherent to the chosen basis (deviating from the ground truth) and significantly higher variance compared to the mean prediction. This is why we excluded the purple curves from our main discussion.)
+
+    \item [3.] Assuming that the number of datasets stays at 10, then increasing the size of each dataset from $N=30$ to a larger number will decrease variance, though the effect on bias is less clear. For larger $N$, estimates of the model parameters should become more stable as each dataset now likely captures more of the underlying pattern. The individual models will therefore be more consistent with one another, reducing the spread between them as identified in part (2). By contrast, the bias may still remain. For example, the model under basis 1 is too simple and systematically underfits the data (does not capture the curvature enough). Thus, having more data points will improve and reduce the variance in our parameter estimates... but these parameters are in the fundamentally wrong model! 
+
+\clearpage
+    \item [4.] Table 1.4.1 details the predicted probabilities and variances:
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.3} % Adjust row height
+    \arrayrulecolor{blue} % Set border color to blue
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textcolor{blue}{\textbf{Time / Metric}} & \textcolor{blue}{\makecell{\textbf{Predicted prob. of obs.} \\ \textbf{based on 1st model}}} & \textcolor{blue}{\textbf{Variance over 10 models}} \\
+        \hline
+        \textcolor{blue}{$\pmb{t = 0.1}$} & \textcolor{blue}{0.8110} & \textcolor{blue}{0.1060} \\
+        \hline
+        \textcolor{blue}{$\pmb{t = 3.2}$} & \textcolor{blue}{1.0} & \textcolor{blue}{0.24} \\
+        \hline
+    \end{tabular}
+    \caption*{\textcolor{blue}{Table 1.4.1: Classification Probabilities and Model Variances}}
+    \label{tab:classification_variances}
+\end{table}
+    We can interpret the predicted probability of observation of the first model as how ``certain'' we are that the planet will be detectable at time $t=0.1$. So we are around 81\% certain that we will be able to detect the planet at $t=0.1$, with $100\% - 81\% = 19\%$ representing our uncertainty. By similar reasoning, we are apparently 100\% certain that we will be able to detect the planet at $t=3.2$. This should raise some skepticism, as how can we be 100\% sure we will be able to observe the planet at exactly $t=3.2$?
+
+    \vspace{.5em}
+    This is where the variance comes into play, which captures the uncertainty in our prediction. Higher variance corresponds to greater uncertainty. Indeed, we can see that we are much less certain our prediction for $t=3.2$ than $t=0.1$, capturing our skepticism of the predicted 100\%.
+    
+    \vspace{.5em}
+    To summarize, there are two distinct layers of uncertainty at play:
+    \begin{enumerate}
+        \item [1.] Uncertainty in whether the planet is detectable at a given $t$ (captured by the predicted probability).
+        \item [2.] Uncertainty in our confidence about this detection probability (captured by the variance of the prediction).
+    \end{enumerate}
+
+    \item [5.] We seek an accurate model that generalizes well beyond the training set. As discussed in part (2), the mean model under basis 2 achieves this best, so we select it as our model.
+
+    \vspace{.5em}
+We want a time $t$ where the predicted observation probability is high and variance is low, so that we have confidence in our detection. From Figure 1.2.2, $t=6$ is ideal, but since it is outside our training range, we opt for $t \approx 5.6$. While the true maximum is at $t \approx 4.8$, we lack access to the ground truth model.
+
+    \vspace{.5em}
+    If the area is humid, visibility may worsen, and we must assess the new telescope’s quality relative to our original. Latitude differences could also affect detectability (e.g., the planet may not be geometrically visible from the equator, in which case we know that there is probability zero of us detecting it, at any time $t$). If we account for these factors, the model may still provide predictions, but with higher variance.
+
+    \vspace{.5em}
+    Plotting both telescopes’ observations suggests they sometimes detect the planet at different times, likely due to instrumental or environmental factors. A better model would incorporate extra predictors for these influences. Refitting with this expanded dataset could improve generalization (in particular for environmental/instrumental factors), reducing the variance in our predictions.
+\end{enumerate}
 \end{solution}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -277,8 +350,116 @@ $\boldX^{-\top} := (\boldX^{\top})^{-1}$
 \newpage
 
 \begin{solution}
-	Your solution here.
+
+\begin{enumerate}
+    \item [1.] Since the data are independent,
+    \begin{align*}
+        p(D; \bpi) &= p\left( \left\{ (\boldx_i, \boldy_i) \right\}_{i=1}^n ; \bpi \right) \\
+        &= \prod_{i=1}^n p\left( (\boldx_i,\boldy_i) ; \bpi \right) \\
+        \therefore \quad \ln p(D; \bpi) &= \sum_{i=1}^n \ln p\left( (\boldx_i,\boldy_i) ; \bpi \right)
+        \tag*{(2.1.1)}
+    \end{align*}
+    Let $y_{ik}$ denote the $k$\textsuperscript{th} entry in the one-hot vector $\boldy_i$. (In other words, $y_{ik}$ is the indicator that data point $i$ belongs to class $k$.) Then
+    \begin{align*}
+        p(\boldx_i, \boldy_i; \bpi) &= \prod_{k=1}^K p(\boldx_i, \boldy_i = C_k; \bpi)^{y_{ik}} \\
+        \therefore \quad \ln p(\boldx_i, \boldy_i; \bpi) &= \sum_{k=1}^K y_{ik} \ln p(\boldx_i, \boldy_i = C_k; \bpi) \tag*{(2.1.2)}
+    \end{align*}
+    Combining (2.1.2) with (2.1.1) gives
+    \begin{align*}
+        \ln p(D; \bpi) &= \sum_{i=1}^n \sum_{k=1}^K y_{ik} \ln p(\boldx_i, \boldy_i = C_k; \bpi) \tag*{(2.1.3)}
+    \end{align*}
+    Now, note that
+    \begin{align*}
+        p(\boldx_i, \boldy_i=C_k; \bpi) &= p(\boldx_i | \boldy_i = C_k)\Pr(\boldy_i = C_k; \bpi) \\
+        &= p(\boldx_i | \boldy_i = C_k) \cdot \pi_k \tag*{(2.1.4)}
+    \end{align*}
+    Combining (2.1.4) with (2.1.3) gives
+    \begin{align*}
+        \Aboxed{ \ln p(D; \bpi) &= \sum_{i=1}^n \sum_{k=1}^K y_{ik} \left\{ \ln p(\boldx_i | \boldy_i = C_k) + \ln \pi_k \right\} } \tag*{(2.1.4)}
+    \end{align*}
+
+    \item[2.] Let $f(\bpi) = \ln p(D; \bpi)$ and $g(\bpi) = \sum_{k=1}^K \pi_k - 1$. We seek to maximize $f$ subject to the constraint $g=0$. We do so by constructing the Lagrangian
+    \begin{align*}
+        L(\bpi, \lambda) &= f(\bpi) + \lambda g(\bpi) \tag*{(2.2.1)}
+    \end{align*}
+    where $\lambda$ denotes the Lagrangian multiplier.
+
+    \vspace{.5em}
+    Computing the gradient yields
+    \begin{align*}
+        \nabla_{\bpi} L(\bpi, \lambda) &= \left( \frac{\partial L}{\partial \pi_1}, \frac{\partial L}{\partial \pi_2}, \ldots, \frac{\partial L}{\partial \pi_K} \right) \\
+        &= \left( \frac{1}{\pi_1}\sum_{i=1}^ny_{i1}, \frac{1}{\pi_2}\sum_{i=1}^ny_{i2}, \ldots, \frac{1}{\pi_K}\sum_{i=1}^ny_{iK} \right) + \lambda(1,1,\ldots,1) \tag*{(2.2.2)}
+    \end{align*}
+    noting that $\ln p(\boldx_i | \boldy_i = C_k)$ is independent of $\bpi$.
+
+    \clearpage
+    To find all critical points, we set the expression in (2.2.2) to 0, which gives
+    \begin{align*}
+        -\lambda = \frac{1}{\pi_1}\sum_{i=1}^ny_{i1} = \frac{1}{\pi_2}\sum_{i=1}^ny_{i2} = \ldots = \frac{1}{\pi_K}\sum_{i=1}^ny_{iK} \tag*{(2.2.3)}
+    \end{align*}
+    and hence
+    \begin{align*}
+        \pi_k = -\frac{1}{\lambda} \sum_{i=1}^n y_{ik} \tag*{(2.2.4)}
+    \end{align*}
+    for $k = 1,2,\ldots,K$.
+
+    \vspace{.5em}
+    Recall the constraint
+    \begin{align*}
+        g(\bpi) = \sum_{k=1}^K \pi_k - 1 = 0 \tag*{(2.2.5)}
+    \end{align*}
+    Combining this with (2.2.4) gives
+    \begin{align*}
+        -\frac{1}{\lambda} \sum_{k=1}^K \sum_{i=1}^n y_{ik} - 1 &= 0 \\
+        \therefore \quad \lambda = -\sum_{i=1}^n \sum_{k=1}^K y_{ik} = -\sum_{i=1}^n 1 = -n \tag*{(2.2.6)}
+    \end{align*}
+    since each data point must belong to exactly one class.
+
+    \vspace{.5em}
+    Combining this with (2.2.4) gives us the MLE
+    \begin{align*}
+        \Aboxed{ \hat{\pi}_k &= \frac{1}{n}\sum_{i=1}^n y_{ik} } \tag*{(2.2.7)}
+    \end{align*}
+    \textbf{Intuition:} The MLE for $\pi_k$---the \textit{unconditional} probability that one of our data points falls into class $k$---is the \textit{proportion} of data points that fall into class $k$. 
+
+    \item[3.] We have that
+    \begin{align*}
+        p(\boldx_i | \boldy_i = C_k) &= \mathcal{N}(\boldx_i | \bmu_k, \bSigma) \\
+        &= \frac{1}{(2\pi)^{n/2}|\bSigma|^{1/2}}\exp \left\{ -\frac{1}{2}(\boldx_i - \bmu_k)^{\mathrm{T}} \bSigma^{-1} (\boldx_i - \bmu_k) \right\} \\
+        \therefore \quad \ln p(\boldx_i | \boldy_i = C_k) &= -\frac{n}{2}\ln 2\pi - \frac{1}{2} \ln |\bSigma| - \frac{1}{2} (\boldx_i - \bmu_k)^{\mathrm{T}} |\bSigma|^{-1} (\boldx_i - \bmu_k) \tag*{(2.3.1)}
+    \end{align*}
+    Combining this with the expression for log-likelihood in (2.1.4),
+    \begin{align*}
+        \frac{\partial \ln p(D; \bpi)}{\partial \bmu_k} &= \sum_{i=1}^n \sum_{k=1}^K y_{ik}\left(-\frac{1}{2}\right)2\left(\bSigma^{-1}\right)(\boldx_i - \bmu_k)(-1) \\
+        \therefore \quad \Aboxed{ \frac{\partial \ln p(D; \bpi)}{\partial \bmu_k} &= \left(\bSigma^{-1}\right)\sum_{i=1}^n y_{ik} (\boldx_i - \bmu_k) } \tag*{(2.3.2)}
+    \end{align*}
+    \item[4.] Setting the expression in (2.3.2) to 0 gives
+    \begin{align*}
+        \sum_{i=1}^n y_{ik}(\boldx_i - \bmu_k) &= 0 \\
+        \therefore \quad \Aboxed{ \hat{\bmu}_k = \frac{\sum_{i=1}^n y_{ik}\boldx_i}{\sum_{i=1}^n y_{ik}} } \tag*{(2.4.1)}
+    \end{align*}
+    \textbf{Intuition:} The MLE for $\bmu_k$ is the average of $\boldx_i$ when considering \textit{only those data points in class $k$}.
+
+    \item[5.] From (2.3.1) and (2.1.4), we have
+    \begin{align*}
+        \frac{\partial \ln p(D; \bpi)}{\partial \bSigma} &= \sum_{i=1}^n \sum_{k=1}^K y_{ik} \left\{ -\frac{1}{2}\left(\bSigma^{-\mathrm{T}}\right) + \frac{1}{2}\left(\bSigma^{-\mathrm{T}}\right) (\boldx_i - \bmu_k)(\boldx_i - \bmu_k)^\mathrm{T}\left(\bSigma^{-T}\right) \right\} \\
+        \therefore \quad \Aboxed{ \frac{\partial \ln p(D; \bpi)}{\partial \bSigma} &= -\frac{n}{2}\left(\bSigma^{-\mathrm{T}}\right) + \frac{1}{2}\left(\bSigma^{-\mathrm{T}}\right)\left\{ \sum_{i=1}^n\sum_{k=1}^K y_{ik} (\boldx_i - \bmu_k)(\boldx_i - \bmu_k)^\mathrm{T} \right\}\left(\bSigma^{-\mathrm{T}}\right) } \tag*{(2.5.1)}
+    \end{align*}
+
+    \item[6.] Setting the expression in (2.5.1) to 0 gives
+    \begin{align*}
+        -\frac{n}{2}\left(\bSigma^{-\mathrm{T}}\right) + \frac{1}{2}\left(\bSigma^{-\mathrm{T}}\right)\left\{ \sum_{i=1}^n\sum_{k=1}^K y_{ik} (\boldx_i - \bmu_k)(\boldx_i - \bmu_k)^\mathrm{T} \right\}\left(\bSigma^{-\mathrm{T}}\right) &= 0
+    \end{align*}
+    Multiplying by $\left(\bSigma^{-\mathrm{T}}\right)$ on both the left and right gives
+    \begin{align*}
+        -\frac{n}{2}\bSigma^{\mathrm{T}} + \frac{1}{2}\sum_{i=1}^n\sum_{k=1}^K y_{ik} (\boldx_i - \bmu_k)(\boldx_i - \bmu_k)^\mathrm{T} &= 0 \\
+        \therefore \quad \hat{\bSigma}^{\mathrm{T}} &= \frac{1}{n}\sum_{i=1}^n\sum_{k=1}^K y_{ik} (\boldx_i - \bmu_k)(\boldx_i - \bmu_k)^\mathrm{T} \\
+        \therefore \quad \Aboxed{ \hat{\bSigma} &= \frac{1}{n}\sum_{i=1}^n\sum_{k=1}^K y_{ik} (\boldx_i - \bmu_k)(\boldx_i - \bmu_k)^\mathrm{T} } \tag*{(2.6.1)}
+    \end{align*}
+\end{enumerate}
+
 \end{solution}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Problem 3
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -288,20 +469,14 @@ In this problem, you will code up three different classifiers to classify differ
 \begin{center}
   \includegraphics[width=.5\textwidth]{img_input/credit.png}
 \end{center}
+We've further transformed the raw data on debt to income ratio and credit score so that the default feature vector that you will be working with is defined as such:
+\[\bm{x} = \left[\text{debt\_income\_ratio} \cdot \frac{200}{7}-7.5, \frac{\text{credit\_score}-500}{140}-0.5\right]^\top\]
 
-Please implement the following classifiers in the \verb|SoftmaxRegression| and \verb|KNNClassifier| classes.
+\noindent Please implement the following classifiers in the \verb|SoftmaxRegression| and \verb|KNNClassifier| classes.
 
-\textbf{For this problem, apply the following transformation to all data:}
-
-$$\phi(\boldx) = \left[x_1 \cdot \frac{200}{7}-7.5, \frac{x_2-500}{140}+0.5\right]^\top$$
-
-  where $x_1$ and $x_2$ represent the values for debt to income ratio and credit score, respectively.
-  
-  This transformation has been applied to the data for you in the notebook.
 
 \begin{enumerate}[label=\alph*)]
 
-  % FDV: Added the two classifiers below based on s22, integrate them into the s23 solution (the rest of this problem is s23) 
   \item \textbf{A generative classifier with Gaussian class-conditional
           densities with a \textit{shared covariance} matrix} across all classes.
         Feel free to re-use your Problem 2 results.
@@ -311,14 +486,13 @@ $$\phi(\boldx) = \left[x_1 \cdot \frac{200}{7}-7.5, \frac{x_2-500}{140}+0.5\righ
         The staff implementation can switch between the two Gaussian generative classifiers with just a
         few lines of code.)
 
-        % FDV: Since they won't have implemented the gradients in Problem 2, can we provide them code for the optimization/otherwise make this part simple?  
-  \item \textbf{A multi-class logistic regression classifier} using the softmax activation function. In your implementation of gradient descent, \textbf{make sure to include a bias term and use L2 regularization} with regularization parameter $\lambda = 0.001$. Limit the number of iterations of gradient descent to 200,000, and set the learning rate to be $\eta = 0.001$.
+  \item \textbf{A multi-class logistic regression classifier} using the softmax activation function. In your implementation of gradient descent, \textbf{make sure to use L2 regularization} with regularization parameter $\lambda = 0.001$. Please also include a bias term, but do not regularize it. Limit the number of iterations of gradient descent to 200,000, and set the learning rate to be $\eta = 0.001$.
 
   \item \textbf{Another multi-class logistic regression classifier} with the additional feature map:
-  $$\phi(\boldx) = [\ln (x_1+10), x_2^2]^\top$$
-  where $x_1$ and $x_2$ represent the values for debt to income ratio and credit score, respectively.
+  $$\phi(\bm x) = [\ln (x_1+10), x_2^2]^\top$$
 
-  \item \textbf{A kNN classifier} in which you classify based on the $k = 1$ and $k = 5$ nearest neighbors and the following distance function: $$dist(loan\_app_1, loan\_app_2) = (debt_1 - debt_2)^2/9 + (credit_1 - credit_2)^2$$
+  \item \textbf{A kNN classifier} in which you classify based on the $k = 1$ and $k = 5$ nearest neighbors and the following distance function: 
+  \[\text{dist}(\boldsymbol{x}, \boldsymbol{x}') = (x_1 - x'_1)^2/9 + (x_2 - x'_2)^2\]
         where nearest neighbors are those with the smallest distances from a given point.
 
         Note 1: When there are more than two labels, no label may have the
@@ -360,17 +534,108 @@ After implementing the above classifiers, complete the following exercises:
 \newpage
 
 \begin{solution}
-	Your solution here.
+
+\begin{enumerate}
+    \item[1.] The decision boundaries are plotted in Figures 3.1.1-6 below.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{img_output/Gaussian with shared covariance.png}
+        \caption*{\textcolor{blue}{Figure 3.1.1: Gaussian with shared covariance matrix}}
+        \label{fig:q3.1a}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.65\textwidth]{img_output/Gaussian with separate covariance.png}
+        \caption*{\textcolor{blue}{Figure 3.1.2: Gaussian with individual covariance matrices}}
+        \label{fig:q3.1b}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.65\textwidth]{img_output/Softmax.png}
+        \caption*{\textcolor{blue}{Figure 3.1.3: Softmax regression}}
+        \label{fig:q3.1c}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.65\textwidth]{img_output/Softmax 2.png}
+        \caption*{\textcolor{blue}{Figure 3.1.4: Softmax regression with additional feature map}}
+        \label{fig:q3.1d}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.65\textwidth]{img_output/KNN, k=1.png}
+        \caption*{\textcolor{blue}{Figure 3.1.5: kNN with k=1}}
+        \label{fig:q3.1e}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.65\textwidth]{img_output/KNN, k=5.png}
+        \caption*{\textcolor{blue}{Figure 3.1.6: kNN with k=5}}
+        \label{fig:q3.1f}
+    \end{figure}
+
+    \clearpage
+    Looking at the Gaussian generative classifiers in Figures 3.1.1\&2, we observe that the model with one shared covariance matrix has linear decision boundaries whereas the model with individual covariance matrices does not. Note that a decision boundary between two classes $k,l$ is defined by $p(\boldy_i = C_k | \boldx_i) = p(\boldy_i = C_l | \boldx_i)$. Recalling equation (2.3.1) we can see that when $\bSigma_k = \bSigma_l$, the quadratic terms in $\boldx_i$ cancel out, and so we are left with a linear equation (as observed in the boundaries in Figure 3.1.1). By contrast, when $\bSigma_k \neq \bSigma_l$, the quadratic term persists and we can get irregular boundaries. Note that using separate covariance allows for more nuanced classification.
+
+    \vspace{.5em}
+    Next, consider Figures 3.1.3\&4, which show the decision boundaries for the multi-class logistic regression models. Figure 3.1.3 shows linear decision boundaries. To understand why, note that the decision boundary is determined by the condition $p(\boldy_i = C_k | \boldx_i) = p(\boldy_i = C_l | \boldx_i)$. This is equivalent to $\text{softmax}(\mathbf{w}_k^\mathrm{T}\boldx_i) = \text{softmax}(\mathbf{w}_l^\mathrm{T}\boldx_i)$, which is equivalent to $(\mathbf{w}_k - \mathbf{w}_l)^\mathrm{T}\boldx_i = 0$, which is linear in $\boldx_i$. By contrast, in Figure 3.1.4, we first applied another basis transformation to the data $\boldx_i$. We can effectively think of $\boldx_{i2}^\prime = \sqrt{\ln (\boldx_{i1}^\prime + 10)}$ where $\boldx_i^\prime$ denotes the transformed data. This equation describes the shape of the curve seen in Figure 3.1.4.
+
+    \vspace{.5em}
+    Next, we look at Figures 3.1.5\&6. We observe that $k=1$ regions contain all the training points: This makes sense as if we have a new test point that is on top of the training point, it will use that training point as its prediction and be exactly correct. By contrast, for $k=5$, we can see that a couple of training points (red) are misclassified. Moreover, we can see that the lower part of the green (Class 2 = Automatically Accepted) boundary is shifted to the right for $k=5$. This reflects the fact that the majority of training points with $\boldx_{i1} < 0.1$ are green, and thus when a larger number of neighbors are considered, their influence outweighs that of the individual red points (versus the $k=1$ scenario). 
+
+    \vspace{.5em}
+    Finally, we make some general comparisons across the different regression methods. In particular, kNN has much more fragmented decision boundaries than do Gaussian or Softmax. This is because kNN is strongly influenced by local training points (which it takes the average of), whereas Gaussian and Softmax are parametric methods that assume a specific form for the decision boundary.
+
+    \item[2.] The classifications are reported in Table 3.2.1 below:
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.3} % Adjust row spacing
+    \arrayrulecolor{blue} % Change border color to blue
+    \begin{tabular}{|l|c|c|}
+        \hline
+        \textcolor{blue}{\textbf{Method}} & \textcolor{blue}{\textbf{Prediction}} & \textcolor{blue}{\textbf{Probabilities}} \\
+        \hline
+        \textcolor{blue}{Gaussian (shared cov matrix)} & \textcolor{blue}{0} & \textcolor{blue}{N/A} \\
+        \hline
+        \textcolor{blue}{Gaussian (separate cov matrix)} & \textcolor{blue}{0} & \textcolor{blue}{N/A} \\
+        \hline
+        \textcolor{blue}{Softmax} & \textcolor{blue}{0} & \textcolor{blue}{[1.0000e+00, 5.7319e-23, 1.5488e-33]} \\
+        \hline
+        \textcolor{blue}{Softmax (with extra feature map)} & \textcolor{blue}{1} & \textcolor{blue}{[2.1969e-01, 7.8024e-01, 7.2108e-05]} \\
+        \hline
+        \textcolor{blue}{kNN (k=1)} & \textcolor{blue}{0} & \textcolor{blue}{N/A} \\
+        \hline
+        \textcolor{blue}{kNN (k=5)} & \textcolor{blue}{0} & \textcolor{blue}{N/A} \\
+        \hline
+    \end{tabular}
+    \caption*{\textcolor{blue}{Table 3.2.1: Prediction results for different models}}
+\end{table}
+    Suppose I have a new data point $\boldx_\text{new}$ and want to assign it a class $\boldy_\text{new} = C_l$, then we have the following interpretations for each model:
+    \begin{enumerate}
+        \item[1.] \textbf{Gaussian.} Assumes that the data within each class follow a Normal distribution and assigns $\boldx_\text{new}$ to the class with the highest (posterior) probability density, $p(\boldy_\text{new} = C_l | \boldx_\text{new})$. If $\boldx_\text{new}$ is ``far'' from our training data, caution is needed since it falls in the tail of the assumed normal distribution. If the real-world data deviates from a perfect Gaussian distribution, this could lead to significant errors in prediction.
+        \item[2.] \textbf{Softmax.} Computes a score for each class, given by $\mathbf{w}^\mathrm{T}\boldx_\text{new}$. Assigns $\boldx_\text{new}$ to the class with the highest score. However, since Softmax \textit{normalizes} these scores (so as to assign a probability to each class), then it will always output a high probability for some class, even if $\boldx_\text{new}$ is very far from our train data. This is in contrast to the Gaussian model, where the probabilities themselves will be low to reflect the uncertainty.
+        \item[3.] \textbf{kNN.} Assigns $\boldx_\text{new}$ to the majority class among its $k$-nearest neighbors. If $\boldx_\text{new}$ is very far from our train set, the $k$ neighbors will not be close at all, and thus our prediction may be very poor.
+    \end{enumerate}
+
+    \item[3.] There are several ethical concerns with using a classifier for such high-stakes decisions. First, credit score and debt-to-income ratio alone overlook important nuances among applicants. For instance, an applicant with a poor credit score and high debt-to-income ratio may not be financially irresponsible—if their payment history reveals they only spend on necessities, a human might approve the loan with a guarantor.
+
+\vspace{.5em}
+Second, many cases are borderline, and whilst a classifier may rigidly assign an applicant to one category over another based on a small probability difference, a human could weigh contextual factors and make a more flexible decision. That said, classifiers can serve as a valuable second opinion and work best alongside human oversight. A more robust model should incorporate situational factors (e.g., recent life events), spending patterns, credit mix, and alternative financial indicators (e.g., employment history, rent payments, etc.).
+
+\vspace{.5em}
+A final concern is that classifiers rely on past human decisions (the train data) to shape future ones. If historical decisions were biased (e.g., systematically denying certain groups), the classifier will reinforce and perpetuate that bias. Unlike humans, who may evolve in their decision-making, a classifier will continue to replicate historical patterns unless actively updated with new, bias-corrected data.
+\end{enumerate}
+
 \end{solution}
 
-\newpage
+\clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Name and Calibration
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
 
-\textbf{Name}:
+\textbf{Name}: \textbf{\textcolor{blue}{Emma Harris}}
 
-\textbf{Collaborators and Resources}: 
+\vspace{.5em}
+\textbf{Collaborators and Resources}: \textbf{\textcolor{blue}{N/A}}
 
 \end{document}
